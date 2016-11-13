@@ -8,6 +8,7 @@
 
 use Cilex\Application;
 use Cilex\Provider\ConfigServiceProvider;
+use Transkriptor\Command\TranscribeCommand;
 
 
 if ( ! $loader = include __DIR__ . '/../vendor/autoload.php' ) {
