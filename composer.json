@@ -1,0 +1,16 @@
+{
+    "name": "k127/language-transkriptor",
+    "description": "Tries to transcribe a word of a given language into IPA",
+    "require": {
+        "cilex/cilex": "^1.1"
+    },
+    "require-dev": {
+        "kherge/box": "^2.7"
+    },
+    "authors": [
+        {
+            "name": "Klaus Hartl",
+            "email": "k127@gmx.de"
+        }
+    ]
+}

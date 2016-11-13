@@ -1,0 +1,23 @@
+#!/usr/bin/env php
+<?php
+/**
+ * Created by PhpStorm.
+ * User: klaushartl
+ * Date: 12.11.2016
+ */
+
+use Cilex\Application;
+use Cilex\Provider\ConfigServiceProvider;
+
+
+if ( ! $loader = include __DIR__ . '/../vendor/autoload.php' ) {
+	die( 'You must set up the project dependencies.' );
+}
+
+$app =new Application( 'Language Transkriptor by <k127@gmx.de>', '@package_version@' );
+$app->register( new ConfigServiceProvider(), array( 'config.path' => __DIR__ . '/../conf/' ) );
+
+// Transkriptor
+$app->command( new TranscribeCommand() );
+
+$app->run();
