@@ -1,6 +1,6 @@
 {
-  "name": "k127/language-transkriptor",
-  "description": "Tries to transcribe a word of a given language into IPA",
+  "name": "k127/nl-transkriptor",
+  "description": "Transcribes a phrase of a given natural language into IPA",
   "authors": [
     {
       "name": "Klaus Hartl",

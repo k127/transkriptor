@@ -23,7 +23,7 @@ use Transkriptor\InputOption\PhraseInputOption;
 
 class TranscribeCommand extends Command {
 	const NAME = 'transcribe';
-	const DESC = 'Tries to transcribe a word of a given language into IPA';
+	const DESC = 'Transcribes a phrase of a given natural language into IPA';
 
 	protected function configure() {
 		$this->setName( self::NAME )->setDescription( self::DESC )->setDefinition(

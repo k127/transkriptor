@@ -15,7 +15,7 @@ if ( ! $loader = include __DIR__ . '/../vendor/autoload.php' ) {
 	die( 'You must set up the project dependencies.' );
 }
 
-$app =new Application( 'Language Transkriptor by <k127@gmx.de>', '@package_version@' );
+$app =new Application( 'PHP Natural Language Transkriptor by <k127@gmx.de>', '@package_version@' );
 $app->register( new ConfigServiceProvider(), array( 'config.path' => __DIR__ . '/../conf/' ) );
 
 // Transkriptor
