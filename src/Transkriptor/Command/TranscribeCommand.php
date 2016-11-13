@@ -51,6 +51,8 @@ class TranscribeCommand extends Command {
 		$output->writeln( sprintf( '<comment>[%s] %s</comment>', $inLang, $inPhrase ) );
 		$output->writeln( sprintf( '<info>[%s] %s</info>', $outLang, $outPhrase ) );
 
+		$output->writeln( '<comment>Please note that phonemes in < > are not yet validated</comment>' );
+
 		return 0;
 	}
 
@@ -73,9 +75,7 @@ class TranscribeCommand extends Command {
 				$outLang );
 		}
 
-		// TODO this needs to be tokenized
 		$tokens = $this->tokenize( $inLang, $inPhrase );
-		var_export( $tokens );
 
 		$outPhrase = '';
 		foreach ( $tokens as $token ) {
@@ -84,19 +84,13 @@ class TranscribeCommand extends Command {
 			}
 		}
 
-		// leading consonants
+		// leading consonants // TODO move to tokenizer
 		$outPhrase = preg_replace( '/(\W)h(\w)/i', '$1$2', $outPhrase );  // silent
 
-		// trailing consonants
+		// trailing consonants // TODO move to tokenizer
 		$outPhrase = preg_replace( '/(\w)s(\W)/i', '$1$2', $outPhrase );  // silent
-		$outPhrase = preg_replace( '/(\w)t(\W)/i', '$1$2', $outPhrase );  // silent
 
-		$outPhrase = trim( $outPhrase );
-		if ( $outLang == 'ipa' ) {
-			$outPhrase = sprintf( '[%s]', $outPhrase );
-		}
-
-		return $outPhrase;
+		return trim( $outPhrase );
 	}
 
 	const SUPPORTED_INPUT_LANGUAGES = [ 'fr' ];
@@ -113,16 +107,20 @@ class TranscribeCommand extends Command {
 			'o'   => '(TODO o)',
 			'oi'  => 'w',
 			'ou'  => 'u',
-			'on'  => 'õ',
+			'on'  => 'õ',  // 'ɔ̃',
 			'ui'  => 'ɥ',
 			'oui' => 'ɥ',
 			'un'  => 'œ̃',
 			'g'   => '(ʒ|g)',
 			'gn'  => 'ɲ',
+			'b'   => 'b',
 			'c'   => 's',
+			'd'   => 'd',
+			'j'   => 'ʒ',
 			'k'   => 'k',
 			'l'   => 'l',
-			'm'   => '(TODO m)',
+			'm'   => 'm',
+			'r'   => 'ʀ',
 			's'   => 's',
 		],
 	];
@@ -234,8 +232,6 @@ class TranscribeCommand extends Command {
 								break( 2 );
 							}
 							break;
-						default:
-							break;
 					}
 					if ( ! preg_match( '/[a-z]/i', $ch2 ) ) {
 						if ( $useLiaison ) {
@@ -244,7 +240,6 @@ class TranscribeCommand extends Command {
 							$tokens[ $tokenId ] = '(e)';
 						}
 						$tokenId ++;
-						$i ++;
 						break;
 					}
 					break;
@@ -307,7 +302,8 @@ class TranscribeCommand extends Command {
 					$tokenId ++;
 					break;
 				case 'b':
-					// TODO
+					$tokens[ $tokenId ] = 'b';
+					$tokenId ++;
 					break;
 				case 'c':
 					if ( $ch2 == '\'' ) {
@@ -327,7 +323,8 @@ class TranscribeCommand extends Command {
 					}
 					break;
 				case 'd':
-					// TODO
+					$tokens[ $tokenId ] = 'd';
+					$tokenId ++;
 					break;
 				case 'f':
 				case 'g':
@@ -345,6 +342,9 @@ class TranscribeCommand extends Command {
 					$tokenId ++;
 					break;
 				case 'j':
+					$tokens[ $tokenId ] = 'j';
+					$tokenId ++;
+					break;
 				case 'k':
 				case 'l':
 					$tokens[ $tokenId ] = 'l';
@@ -358,7 +358,8 @@ class TranscribeCommand extends Command {
 				case 'p':
 				case 'q':
 				case 'r':
-					// TODO
+					$tokens[ $tokenId ] = 'r';
+					$tokenId ++;
 					break;
 				case 's':
 					switch ( $ch2 ) {
