@@ -253,7 +253,9 @@ class TranscribeCommand extends Command {
 							$tokens[ $tokenId ] = '(e)';
 						}
 						$tokenId ++;
-						break;
+					} else {
+						$tokens[ $tokenId ] = 'e';
+						$tokenId ++;
 					}
 					break;
 				case 'i':
@@ -346,6 +348,7 @@ class TranscribeCommand extends Command {
 					$tokenId ++;
 					break;
 				case 'f':
+					break;
 				case 'g':
 					if ( $ch2 == 'n' ) {
 						$tokens[ $tokenId ] = 'gn';
@@ -365,6 +368,7 @@ class TranscribeCommand extends Command {
 					$tokenId ++;
 					break;
 				case 'k':
+					break;
 				case 'l':
 					$tokens[ $tokenId ] = 'l';
 					$tokenId ++;
@@ -391,10 +395,10 @@ class TranscribeCommand extends Command {
 					}
 					break;
 				case 'q':
-					if ( $ch2 == 'u' && $ch3 == 'e' ) {
+					if ( $ch2 == 'u' ) {
 						$tokens[ $tokenId ] = 'k';
 						$tokenId ++;
-						$i += 2;
+						$i ++;
 					}
 					break;
 				case 'r':
@@ -436,9 +440,13 @@ class TranscribeCommand extends Command {
 					}
 					break;
 				case 'v':
+					break;
 				case 'w':
+					break;
 				case 'x':
+					break;
 				case 'z':
+					break;
 				default:
 			}
 		}
