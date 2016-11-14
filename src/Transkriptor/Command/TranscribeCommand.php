@@ -48,10 +48,15 @@ class TranscribeCommand extends Command {
 		}
 
 		$outPhrase = $this->transcribe( $inLang, $outLang, $inPhrase );
-		$output->writeln( sprintf( '<comment>[%s] %s</comment>', $inLang, $inPhrase ) );
-		$output->writeln( sprintf( '<info>[%s] %s</info>', $outLang, $outPhrase ) );
 
-		if ( strpos( $outPhrase, '<' ) !== false ) {
+		if ( $output->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE ) {
+			$output->writeln( sprintf( '<comment>[%s] %s</comment>', $inLang, $inPhrase ) );
+			$output->writeln( sprintf( '<info>[%s] %s</info>', $outLang, $outPhrase ) );
+		} else {
+			$output->writeln( sprintf( '<info>%s</info>', $outPhrase ) );
+		}
+
+		if ( strpos( $outPhrase, '<' ) !== false && $output->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE ) {
 			$output->writeln( '<comment>Please note that phonemes in < > are not yet validated</comment>' );
 		}
 
