@@ -51,7 +51,9 @@ class TranscribeCommand extends Command {
 		$output->writeln( sprintf( '<comment>[%s] %s</comment>', $inLang, $inPhrase ) );
 		$output->writeln( sprintf( '<info>[%s] %s</info>', $outLang, $outPhrase ) );
 
-		$output->writeln( '<comment>Please note that phonemes in < > are not yet validated</comment>' );
+		if ( strpos( $outPhrase, '<' ) !== false ) {
+			$output->writeln( '<comment>Please note that phonemes in < > are not yet validated</comment>' );
+		}
 
 		return 0;
 	}
@@ -98,18 +100,22 @@ class TranscribeCommand extends Command {
 	const IPA = [
 		'fr' => [
 			'-'   => ' ',
+			'a'   => 'a',
 			'ai'  => 'ɛ',
 			'au'  => 'o',
 			'eau' => 'o',
 			'an'  => 'ã',
-			'e'   => 'ə',
-			'i'   => '(TODO i)',
-			'o'   => '(TODO o)',
+			'e'   => '<e|ə|ɛ>',
+			'en'  => 'ɛ̃',
+			'i'   => 'i',
+			'in'  => 'ɛ̃',
+			'o'   => 'ɔ',
 			'oi'  => 'w',
 			'ou'  => 'u',
 			'on'  => 'õ',  // 'ɔ̃',
 			'ui'  => 'ɥ',
 			'oui' => 'ɥ',
+			'u'   => 'y',
 			'un'  => 'œ̃',
 			'g'   => '(ʒ|g)',
 			'gn'  => 'ɲ',
@@ -120,8 +126,10 @@ class TranscribeCommand extends Command {
 			'k'   => 'k',
 			'l'   => 'l',
 			'm'   => 'm',
+			'n'   => 'n',
 			'r'   => 'ʀ',
 			's'   => 's',
+			't'   => 't',
 		],
 	];
 
@@ -186,6 +194,8 @@ class TranscribeCommand extends Command {
 							$i ++;
 							break( 2 );
 						default:
+							$tokens[ $tokenId ] = 'a';
+							$tokenId ++;
 					}
 					break;
 				case 'e':
@@ -213,9 +223,11 @@ class TranscribeCommand extends Command {
 								$tokens[ $tokenId ] = 'e(r)';
 								$tokenId ++;
 								$i ++;
-								break( 2 );
+							} else {
+								$tokens[ $tokenId ] = 'e';
+								$tokenId ++;
 							}
-							break;
+							break( 2 );
 						case 't':
 							if ( ! preg_match( '/[a-z]/i', $ch3 ) ) {
 								$tokens[ $tokenId ] = 'e(t)';
@@ -271,11 +283,14 @@ class TranscribeCommand extends Command {
 								$i ++;
 							}
 							break( 2 );
+						/** @noinspection PhpMissingBreakStatementInspection */
 						case 'n':
-							$tokens[ $tokenId ] = 'on';
-							$tokenId ++;
-							$i ++;
-							break( 2 );
+							if ( $ch3 != 'n' && $ch4 != 'e' ) {
+								$tokens[ $tokenId ] = 'on';
+								$tokenId ++;
+								$i ++;
+								break( 2 );
+							}
 						default:
 							$tokens[ $tokenId ] = 'o';
 							$tokenId ++;
@@ -295,6 +310,9 @@ class TranscribeCommand extends Command {
 							$i ++;
 							break( 2 );
 						default:
+							$tokens[ $tokenId ] = 'u';
+							$tokenId ++;
+							break( 2 );
 					}
 					break;
 				case 'y':
@@ -355,6 +373,15 @@ class TranscribeCommand extends Command {
 					$tokenId ++;
 					break;
 				case 'n':
+					if ( $ch2 == 'n' && $ch3 == 'e' ) {
+						$tokens[ $tokenId ] = 'n(ne)';
+						$tokenId ++;
+						$i += 2;
+					} else {
+						$tokens[ $tokenId ] = 'n';
+						$tokenId ++;
+					}
+					break;
 				case 'p':
 				case 'q':
 				case 'r':
@@ -389,6 +416,9 @@ class TranscribeCommand extends Command {
 						} else {
 							$tokens[ $tokenId ] = '(t)';
 						}
+						$tokenId ++;
+					} else {
+						$tokens[ $tokenId ] = 't';
 						$tokenId ++;
 					}
 					break;
