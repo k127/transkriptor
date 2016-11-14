@@ -117,10 +117,12 @@ class TranscribeCommand extends Command {
 			'oui' => 'ɥ',
 			'u'   => 'y',
 			'un'  => 'œ̃',
-			'g'   => '(ʒ|g)',
+			'g'   => 'ʒ',
+			'gg'  => 'ɡ',
 			'gn'  => 'ɲ',
 			'b'   => 'b',
 			'c'   => 's',
+			'ch'  => 'ʃ',
 			'd'   => 'd',
 			'f'   => 'f',
 			'j'   => 'ʒ',
@@ -337,6 +339,11 @@ class TranscribeCommand extends Command {
 							$tokens[ $tokenId ] = 'c';
 							$tokenId ++;
 							break( 2 );
+						case 'h':
+							$tokens[ $tokenId ] = 'ch';
+							$tokenId ++;
+							$i ++;
+							break( 2 );
 						default:
 							$tokens[ $tokenId ] = 'k';
 							$tokenId ++;
@@ -350,13 +357,26 @@ class TranscribeCommand extends Command {
 				case 'f':
 					break;
 				case 'g':
-					if ( $ch2 == 'n' ) {
-						$tokens[ $tokenId ] = 'gn';
-						$tokenId ++;
-						$i ++;
-					} else {
-						$tokens[ $tokenId ] = 'g';
-						$tokenId ++;
+					switch ( $ch2 ) {
+						case 'e':
+							$tokens[ $tokenId ] = 'g(e)';
+							$tokenId ++;
+							$i ++;
+							break( 2 );
+						case 'g':
+							$tokens[ $tokenId ] = 'gg';
+							$tokenId ++;
+							$i ++;
+							break( 2 );
+						case 'n':
+							$tokens[ $tokenId ] = 'gn';
+							$tokenId ++;
+							$i ++;
+							break( 2 );
+						default:
+							$tokens[ $tokenId ] = 'gg';
+							$tokenId ++;
+							break( 2 );
 					}
 					break;
 				case 'h':
