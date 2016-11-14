@@ -4,8 +4,6 @@
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/tests" isTestSource="true" />
-      <excludeFolder url="file://$MODULE_DIR$/vendor/cilex/cilex" />
-      <excludeFolder url="file://$MODULE_DIR$/vendor/cilex/console-service-provider" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/composer" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/doctrine/annotations" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/doctrine/lexer" />
@@ -20,7 +18,6 @@
       <excludeFolder url="file://$MODULE_DIR$/vendor/phine/exception" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/phine/path" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/phpseclib/phpseclib" />
-      <excludeFolder url="file://$MODULE_DIR$/vendor/pimple/pimple" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/psr/log" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/seld/jsonlint" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/symfony/console" />
@@ -87,28 +84,28 @@
     <orderEntry type="module-library">
       <library name="PHARS">
         <CLASSES>
-          <root url="phar://$MODULE_DIR$/vendor/herrera-io/box/res/empty.phar/" />
-          <root url="phar://$MODULE_DIR$/vendor/herrera-io/box/res/sha512.phar/" />
-          <root url="phar://$MODULE_DIR$/vendor/herrera-io/box/res/missing.phar/" />
-          <root url="phar://$MODULE_DIR$/vendor/herrera-io/box/res/md5.phar/" />
-          <root url="phar://$MODULE_DIR$/vendor/herrera-io/box/res/example.phar/" />
           <root url="phar://$MODULE_DIR$/vendor/herrera-io/box/res/mixed.phar/" />
           <root url="phar://$MODULE_DIR$/vendor/herrera-io/box/res/openssl.phar/" />
           <root url="phar://$MODULE_DIR$/vendor/herrera-io/box/res/sha256.phar/" />
           <root url="phar://$MODULE_DIR$/vendor/herrera-io/box/res/invalid.phar/" />
           <root url="phar://$MODULE_DIR$/vendor/herrera-io/box/res/sha1.phar/" />
+          <root url="phar://$MODULE_DIR$/vendor/herrera-io/box/res/empty.phar/" />
+          <root url="phar://$MODULE_DIR$/vendor/herrera-io/box/res/sha512.phar/" />
+          <root url="phar://$MODULE_DIR$/vendor/herrera-io/box/res/missing.phar/" />
+          <root url="phar://$MODULE_DIR$/vendor/herrera-io/box/res/md5.phar/" />
+          <root url="phar://$MODULE_DIR$/vendor/herrera-io/box/res/example.phar/" />
         </CLASSES>
         <SOURCES>
-          <root url="phar://$MODULE_DIR$/vendor/herrera-io/box/res/empty.phar/" />
-          <root url="phar://$MODULE_DIR$/vendor/herrera-io/box/res/sha512.phar/" />
-          <root url="phar://$MODULE_DIR$/vendor/herrera-io/box/res/missing.phar/" />
-          <root url="phar://$MODULE_DIR$/vendor/herrera-io/box/res/md5.phar/" />
-          <root url="phar://$MODULE_DIR$/vendor/herrera-io/box/res/example.phar/" />
           <root url="phar://$MODULE_DIR$/vendor/herrera-io/box/res/mixed.phar/" />
           <root url="phar://$MODULE_DIR$/vendor/herrera-io/box/res/openssl.phar/" />
           <root url="phar://$MODULE_DIR$/vendor/herrera-io/box/res/sha256.phar/" />
           <root url="phar://$MODULE_DIR$/vendor/herrera-io/box/res/invalid.phar/" />
           <root url="phar://$MODULE_DIR$/vendor/herrera-io/box/res/sha1.phar/" />
+          <root url="phar://$MODULE_DIR$/vendor/herrera-io/box/res/empty.phar/" />
+          <root url="phar://$MODULE_DIR$/vendor/herrera-io/box/res/sha512.phar/" />
+          <root url="phar://$MODULE_DIR$/vendor/herrera-io/box/res/missing.phar/" />
+          <root url="phar://$MODULE_DIR$/vendor/herrera-io/box/res/md5.phar/" />
+          <root url="phar://$MODULE_DIR$/vendor/herrera-io/box/res/example.phar/" />
         </SOURCES>
       </library>
     </orderEntry>
