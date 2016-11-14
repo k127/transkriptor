@@ -9,8 +9,8 @@
 namespace Transkriptor\Command;
 
 
-use Cilex\Command\Command;
 use Exception;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Exception\InvalidOptionException;
 use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputInterface;
