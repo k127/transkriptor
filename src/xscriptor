@@ -6,8 +6,7 @@
  * Date: 12.11.2016
  */
 
-use Cilex\Application;
-use Cilex\Provider\ConfigServiceProvider;
+use Symfony\Component\Console\Application;
 use Transkriptor\Command\TranscribeCommand;
 
 
@@ -15,10 +14,9 @@ if ( ! $loader = include __DIR__ . '/../vendor/autoload.php' ) {
 	die( 'You must set up the project dependencies.' );
 }
 
-$app =new Application( 'PHP Natural Language Transkriptor by <k127@gmx.de>', '@package_version@' );
-$app->register( new ConfigServiceProvider(), array( 'config.path' => __DIR__ . '/../conf/' ) );
+$app = new Application( 'PHP Natural Language Transkriptor by <k127@gmx.de>', '@package_version@' );
 
 // Transkriptor
-$app->command( new TranscribeCommand() );
+$app->add( new TranscribeCommand() );
 
 $app->run();
