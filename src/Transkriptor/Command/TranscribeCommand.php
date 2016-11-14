@@ -105,7 +105,7 @@ class TranscribeCommand extends Command {
 			'au'  => 'o',
 			'eau' => 'o',
 			'an'  => 'ã',
-			'e'   => '<e|ə|ɛ>',
+			'e'   => '(e|ə|ɛ)',
 			'en'  => 'ɛ̃',
 			'i'   => 'i',
 			'in'  => 'ɛ̃',
@@ -122,6 +122,7 @@ class TranscribeCommand extends Command {
 			'b'   => 'b',
 			'c'   => 's',
 			'd'   => 'd',
+			'f'   => 'f',
 			'j'   => 'ʒ',
 			'k'   => 'k',
 			'l'   => 'l',
@@ -383,7 +384,19 @@ class TranscribeCommand extends Command {
 					}
 					break;
 				case 'p':
+					if ( $ch2 == 'h' ) {
+						$tokens[ $tokenId ] = 'f';
+						$tokenId ++;
+						$i ++;
+					}
+					break;
 				case 'q':
+					if ( $ch2 == 'u' && $ch3 == 'e' ) {
+						$tokens[ $tokenId ] = 'k';
+						$tokenId ++;
+						$i += 2;
+					}
+					break;
 				case 'r':
 					$tokens[ $tokenId ] = 'r';
 					$tokenId ++;
