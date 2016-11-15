@@ -1,3 +1,6 @@
+
+[![Build Status](https://travis-ci.org/k127/transkriptor.svg?branch=master)](https://travis-ci.org/k127/transkriptor)
+
 # PHP Natural Language Transkriptor
 
 ## Synopsis
