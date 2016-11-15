@@ -49,11 +49,16 @@ class TranscribeCommand extends Command {
 
 		$outPhrase = $this->transcribe( $inLang, $outLang, $inPhrase );
 
+		if ( $outLang == 'ipa' ) {
+			$outPhrase = preg_replace( '/\s+/', ' ', $outPhrase );
+			$outPhrase = '[' . implode( '] [', explode( ' ', $outPhrase ) ) . ']';
+		}
+
 		if ( $output->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE ) {
 			$output->writeln( sprintf( '<comment>[%s] %s</comment>', $inLang, $inPhrase ) );
 			$output->writeln( sprintf( '<info>[%s] %s</info>', $outLang, $outPhrase ) );
 		} else {
-			$output->writeln( sprintf( '<info>%s</info>', $outPhrase ) );
+			$output->write( sprintf( '<info>%s</info>', $outPhrase ) );
 		}
 
 		if ( strpos( $outPhrase, '<' ) !== false && $output->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE ) {
@@ -110,8 +115,11 @@ class TranscribeCommand extends Command {
 			'au'  => 'o',
 			'eau' => 'o',
 			'an'  => 'ã',
-			'e'   => '(e|ə|ɛ)',
+			'e'   => 'ə',
+			'ee'  => 'e',
+			'ɛ'   => 'ɛ',
 			'en'  => 'ɛ̃',
+			'eu'  => 'œ',
 			'i'   => 'i',
 			'in'  => 'ɛ̃',
 			'o'   => 'ɔ',
@@ -130,7 +138,8 @@ class TranscribeCommand extends Command {
 			'ch'  => 'ʃ',
 			'd'   => 'd',
 			'f'   => 'f',
-			'j'   => 'ʒ',
+			'ʒ'   => 'ʒ',
+			'j'   => 'j',
 			'k'   => 'k',
 			'l'   => 'l',
 			'm'   => 'm',
@@ -138,6 +147,8 @@ class TranscribeCommand extends Command {
 			'r'   => 'ʀ',
 			's'   => 's',
 			't'   => 't',
+			'v'   => 'v',
+			'z'   => 'z',
 		],
 	];
 
@@ -165,16 +176,19 @@ class TranscribeCommand extends Command {
 	 */
 	private function tokenizeFR( $inPhrase ) {
 
-		$useLiaison = false;
-		$tokens     = [];
-		$tokenId    = 0;
-		$inPhraseA  = str_split( $inPhrase );
+		$useLiaison        = false;
+		$tokens            = [];
+		$tokenId           = 0;
+		$wordCharPatternFR = '/[a-zàâçéèêëîïôûùüÿñæœ]/i';
+		$inPhrase          = preg_replace( '/(\w)\'(\w)/', '$1$2', $inPhrase );  // remove '
+		// TODO remove punctuation
+		$inPhraseA = str_split( $inPhrase );
 		for ( $i = 0; $i < sizeof( $inPhraseA ); $i ++ ) {
 			$ch  = $inPhraseA[ $i ];
 			$ch2 = array_key_exists( $i + 1, $inPhraseA ) ? $inPhraseA[ $i + 1 ] : '';
 			$ch3 = array_key_exists( $i + 2, $inPhraseA ) ? $inPhraseA[ $i + 2 ] : '';
 			$ch4 = array_key_exists( $i + 3, $inPhraseA ) ? $inPhraseA[ $i + 3 ] : '';
-			if ( ! preg_match( '/[a-z]/i', $ch ) && ! array_key_exists( $tokenId, $tokens ) ) {
+			if ( ! preg_match( $wordCharPatternFR, $ch ) && ! array_key_exists( $tokenId, $tokens ) ) {
 				// FIXME if ( ! ( ! array_key_exists( $tokenId - 1, $tokens ) || $tokens[ $tokenId - 1 ] !== '-' ) ) {
 				$tokens[ $tokenId ] = '-';
 				$tokenId ++;
@@ -222,13 +236,24 @@ class TranscribeCommand extends Command {
 							$i ++;
 							break( 2 );
 						case 'n':
-							$tokens[ $tokenId ] = 'en';
-							$tokenId ++;
-							$i ++;
-							break( 2 );
+							switch ( $ch3 ) {
+								case 'o':
+									$tokens[ $tokenId ] = 'e';
+									$tokenId ++;
+									break( 3 );
+								case 'n':
+									$tokens[ $tokenId ] = 'ɛ';
+									$tokenId ++;
+									break( 3 );
+								default:
+									$tokens[ $tokenId ] = 'en';
+									$tokenId ++;
+									$i ++;
+									break( 3 );
+							}
 						case 'r':
-							if ( ! preg_match( '/[a-z]/i', $ch3 ) ) {
-								$tokens[ $tokenId ] = 'e(r)';
+							if ( ! preg_match( $wordCharPatternFR, $ch3 ) ) {
+								$tokens[ $tokenId ] = 'ee(r)';
 								$tokenId ++;
 								$i ++;
 							} else {
@@ -237,15 +262,15 @@ class TranscribeCommand extends Command {
 							}
 							break( 2 );
 						case 't':
-							if ( ! preg_match( '/[a-z]/i', $ch3 ) ) {
-								$tokens[ $tokenId ] = 'e(t)';
+							if ( ! preg_match( $wordCharPatternFR, $ch3 ) ) {
+								$tokens[ $tokenId ] = 'ee(t)';
 								$tokenId ++;
 								$i ++;
 								break( 2 );
 							}
 							break;
 						case 's':
-							if ( $ch3 == 't' && ! preg_match( '/[a-z]/i', $ch4 ) ) {
+							if ( $ch3 == 't' && ! preg_match( $wordCharPatternFR, $ch4 ) ) {
 								$tokens[ $tokenId ] = 'e(st)';
 								$tokenId ++;
 								$i += 2;
@@ -253,12 +278,8 @@ class TranscribeCommand extends Command {
 							}
 							break;
 					}
-					if ( ! preg_match( '/[a-z]/i', $ch2 ) ) {
-						if ( $useLiaison ) {
-							$tokens[ $tokenId ] = 'e';
-						} else {
-							$tokens[ $tokenId ] = '(e)';
-						}
+					if ( ! preg_match( $wordCharPatternFR, $ch2 ) ) {
+						$tokens[ $tokenId ] = $useLiaison ? 'e' : '(e)';
 						$tokenId ++;
 					} else {
 						$tokens[ $tokenId ] = 'e';
@@ -356,17 +377,23 @@ class TranscribeCommand extends Command {
 					}
 					break;
 				case 'd':
-					$tokens[ $tokenId ] = 'd';
-					$tokenId ++;
+					if ( ! preg_match( $wordCharPatternFR, $ch2 ) ) {
+						$tokens[ $tokenId ] = $useLiaison ? 'd' : '(d)';
+						$tokenId ++;
+					} else {
+						$tokens[ $tokenId ] = 'd';
+						$tokenId ++;
+					}
 					break;
 				case 'f':
 					break;
 				case 'g':
 					switch ( $ch2 ) {
 						case 'e':
-							$tokens[ $tokenId ] = 'g(e)';
+							$tokens[ $tokenId ] = 'g';
 							$tokenId ++;
-							$i ++;
+//							TODO verify
+//							$i ++;
 							break( 2 );
 						case 'g':
 							$tokens[ $tokenId ] = 'gg';
@@ -389,7 +416,7 @@ class TranscribeCommand extends Command {
 					$tokenId ++;
 					break;
 				case 'j':
-					$tokens[ $tokenId ] = 'j';
+					$tokens[ $tokenId ] = 'ʒ';
 					$tokenId ++;
 					break;
 				case 'k':
@@ -399,8 +426,14 @@ class TranscribeCommand extends Command {
 					$tokenId ++;
 					break;
 				case 'm':
-					$tokens[ $tokenId ] = 'm';
-					$tokenId ++;
+					if ( $ch2 == 'm' && $ch3 == 'e' ) {
+						$tokens[ $tokenId ] = 'm(me)';
+						$tokenId ++;
+						$i += 2;
+					} else {
+						$tokens[ $tokenId ] = 'm';
+						$tokenId ++;
+					}
 					break;
 				case 'n':
 					if ( $ch2 == 'n' && $ch3 == 'e' ) {
@@ -432,10 +465,11 @@ class TranscribeCommand extends Command {
 					break;
 				case 's':
 					switch ( $ch2 ) {
-						case 'e':
-							$tokens[ $tokenId ] = 'z';
-							$tokenId ++;
-							break( 2 );
+//						case 'e':
+//							 TODO verify
+//							$tokens[ $tokenId ] = 'z';
+//							$tokenId ++;
+//							break( 2 );
 						case 'a':
 							$tokens[ $tokenId ] = 's';
 							$tokenId ++;
@@ -445,19 +479,37 @@ class TranscribeCommand extends Command {
 							$tokenId ++;
 							$i ++;
 							break( 2 );
-						default:
-							$tokens[ $tokenId ] = 's';
-							$tokenId ++;
-							break( 2 );
+					}
+					if ( ! preg_match( $wordCharPatternFR, $ch2 ) ) {
+						$tokens[ $tokenId ] = $useLiaison ? 's' : '(s)';
+						$tokenId ++;
+					} else {
+						$tokens[ $tokenId ] = 's';
+						$tokenId ++;
 					}
 					break;
 				case 't':
-					if ( ! preg_match( '/[a-z]/i', $ch2 ) ) {
-						if ( $useLiaison ) {
-							$tokens[ $tokenId ] = 't';
-						} else {
-							$tokens[ $tokenId ] = '(t)';
-						}
+					switch ( $ch2 ) {
+						case 'i':
+							if ( $ch3 == 'o' ) {
+								$tokens[ $tokenId ] = 's';
+								$tokenId ++;
+								$tokens[ $tokenId ] = 'j';
+								$tokenId ++;
+								$i ++;
+							} else {
+								$tokens[ $tokenId ] = 't';
+								$tokenId ++;
+							}
+							break( 2 );
+						case 't':
+							$tokens[ $tokenId ] = 't(t)';
+							$tokenId ++;
+							$i ++;
+							break( 2 );
+					}
+					if ( ! preg_match( $wordCharPatternFR, $ch2 ) ) {
+						$tokens[ $tokenId ] = $useLiaison ? 't' : '(t)';
 						$tokenId ++;
 					} else {
 						$tokens[ $tokenId ] = 't';
@@ -465,6 +517,8 @@ class TranscribeCommand extends Command {
 					}
 					break;
 				case 'v':
+					$tokens[ $tokenId ] = 'v';
+					$tokenId ++;
 					break;
 				case 'w':
 					break;

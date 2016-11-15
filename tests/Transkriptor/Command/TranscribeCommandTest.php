@@ -48,30 +48,38 @@ class TranscribeCommandTest extends PHPUnit_Framework_TestCase {
 		//
 
 		// a
-		$this->assertContains( '[ipa] tabl', $this->_testPhrase( 'table' ) );
-		$this->assertContains( '[ipa] sak', $this->_testPhrase( 'sac' ) );
-		$this->assertContains( '[ipa] ʃa', $this->_testPhrase( 'chat' ) );
-//		$this->assertContains( '[ipa] bæɡɪdʒ', $this->_testPhrase( 'baggage' ) );  // TODO
-		$this->assertContains( '[ipa] matɛ̃', $this->_testPhrase( 'matin' ) );
+		$this->assertEquals( '[tabl]', $this->_testPhrase( 'table' ) );
+		$this->assertEquals( '[sak]', $this->_testPhrase( 'sac' ) );
+		$this->assertEquals( '[ʃa]', $this->_testPhrase( 'chat' ) );
+//		$this->assertEquals( '[bæɡɪdʒ]', $this->_testPhrase( 'baggage' ) );  // TODO
+		$this->assertEquals( '[matɛ̃]', $this->_testPhrase( 'matin' ) );
 
 		// e
-		$this->assertRegExp( '/\[ipa\] ʒ[ə]?nu$/', $this->_testPhrase( 'genou' ) );
-//		$this->assertRegExp( '/\[ipa\] s[ə]?ɡɔ̃$/', $this->_testPhrase( 'second' ) );  // TODO
-//		$this->assertRegExp( '/\[ipa\] ʃ[ə]?val$/', $this->_testPhrase( 'cheval' ) );  // TODO
+		$this->assertEquals( '[ʒənu]', $this->_testPhrase( 'genou' ) );
+		$this->assertEquals( '[səkõ]', $this->_testPhrase( 'second' ) );
+		$this->assertEquals( '[ʃəval]', $this->_testPhrase( 'cheval' ) );
 
 		// -er/-et
-		// ...
+		$this->assertEquals( '[mãʒe]', $this->_testPhrase( 'manger' ) );
+		$this->assertEquals( '[e]', $this->_testPhrase( 'et' ) );
 
 		// i/y
-		// ...
-		$this->assertContains( '[ipa] fisik', $this->_testPhrase( 'physique' ) );
-		// ...
+		$this->assertEquals( '[li]', $this->_testPhrase( 'lit' ) );
+//		$this->assertEquals( '[minyt]', $this->_testPhrase( 'minute' ) );  // TODO
+		$this->assertEquals( '[kuʀiʀ]', $this->_testPhrase( 'courir' ) );
+//		$this->assertEquals( '[sistɛm]', $this->_testPhrase( 'système' ) );  // TODO fix encoding problem
+		$this->assertEquals( '[fisik]', $this->_testPhrase( 'physique' ) );
 
 		// o
-		// ...
+		$this->assertEquals( '[bɔt]', $this->_testPhrase( 'botte' ) );
+		$this->assertEquals( '[ɔm]', $this->_testPhrase( 'homme' ) );
+//		$this->assertEquals( '[velo]', $this->_testPhrase( 'vélo' ) );  // TODO fix encoding problem
+		$this->assertEquals( '[ɛ̃diɡɔ]', $this->_testPhrase( 'indigo' ) );
 
 		// u
-		// ... 
+		$this->assertEquals( '[ʒy]', $this->_testPhrase( 'jus' ) );
+		$this->assertEquals( '[tisy]', $this->_testPhrase( 'tissu' ) );
+		$this->assertEquals( '[ytil]', $this->_testPhrase( 'utile' ) );
 
 
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////////
