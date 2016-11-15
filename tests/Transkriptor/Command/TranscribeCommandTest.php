@@ -87,10 +87,48 @@ class TranscribeCommandTest extends PHPUnit_Framework_TestCase {
 		//   stressed vowels
 		//
 
-//		$this->assertContains( '[ipa] kɛlkœ̃', $this->_testPhrase( 'quelqu\'un' ) );
+		// ...
+
+
+		////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		//
+		//   vowel combinations
+		//
+
+		// ai
+		$this->assertContains( '[mɛzõ]', $this->_testPhrase( 'maison' ) );
+		$this->assertContains( '[movɛ]', $this->_testPhrase( 'mauvais' ) );
+		$this->assertContains( '[ʒɛ]', $this->_testPhrase( 'j\'ai' ) );
+
+		// au/eau
+		$this->assertContains( '[ʒuʀno]', $this->_testPhrase( 'journaux' ) );
+		$this->assertContains( '[bo]', $this->_testPhrase( 'beau' ) );
+
+		// eu/œu
+		// ...
+
+		// oi
+		// ...
+
+		// ou
+		// ...
+
+		// ui/oui
+		// ...
+
+
+		////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		//
+		//   nasal vowels
+		//
+
+		// ...
+
 //		$this->assertContains( '', $this->_testPhrase( '' ) );
 //		$this->assertContains( '', $this->_testPhrase( '' ) );
 //		$this->assertContains( '', $this->_testPhrase( '' ) );
 //		$this->assertContains( '', $this->_testPhrase( '' ) );
+
+		$this->assertContains( 'kɛlkœ̃', $this->_testPhrase( 'quelqu\'un' ) );
 	}
 }

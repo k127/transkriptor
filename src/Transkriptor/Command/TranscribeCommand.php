@@ -204,6 +204,11 @@ class TranscribeCommand extends Command {
 							$tokens[ $tokenId ] = 'ai';
 							$tokenId ++;
 							$i ++;
+							if ( $ch3 == 's' && preg_match( $wordCharPatternFR, $ch4 ) ) {
+								$tokens[ $tokenId ] = 'z';
+								$tokenId ++;
+								$i ++;
+							}
 							break( 2 );
 						case 'u':
 							$tokens[ $tokenId ] = 'au';
@@ -251,6 +256,13 @@ class TranscribeCommand extends Command {
 									$i ++;
 									break( 3 );
 							}
+						case 'l':
+							if ( $ch3 != 'l' ) {
+								$tokens[ $tokenId ] = 'ɛ';
+								$tokenId ++;
+								break( 2 );
+							}
+							break;
 						case 'r':
 							if ( ! preg_match( $wordCharPatternFR, $ch3 ) ) {
 								$tokens[ $tokenId ] = 'ee(r)';
@@ -523,6 +535,10 @@ class TranscribeCommand extends Command {
 				case 'w':
 					break;
 				case 'x':
+					if ( ! preg_match( $wordCharPatternFR, $ch2 ) ) {
+						$tokens[ $tokenId ] = '(x)';
+						$tokenId ++;
+					}
 					break;
 				case 'z':
 					break;
