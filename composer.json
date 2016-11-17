@@ -9,6 +9,7 @@
   ],
   "autoload": {
     "psr-0": {
+      "Tokenizers": "src",
       "Transkriptor": "src"
     }
   },

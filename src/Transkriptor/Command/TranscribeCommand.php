@@ -17,6 +17,8 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\Question;
+use Tokenizers\FrPhonemTokenizer;
+use Transkriptor\FrIpaTranskriptor;
 use Transkriptor\InputOption\InputLanguageInputOption;
 use Transkriptor\InputOption\OutputLanguageInputOption;
 use Transkriptor\InputOption\PhraseInputOption;
@@ -78,13 +80,21 @@ class TranscribeCommand extends Command {
 	}
 
 	private function transcribe( $inLang, $outLang, $inPhrase ) {
-		if ( ! in_array( $inLang, self::SUPPORTED_INPUT_LANGUAGES ) ) {
-			throw new InvalidOptionException( sprintf( "<error>Input language '%s' is not (yet) supported</error>" ),
-				$inLang );
-		}
-		if ( ! in_array( $outLang, self::SUPPORTED_OUTPUT_LANGUAGES ) ) {
-			throw new InvalidOptionException( sprintf( "<error>Output language '%s' is not (yet) supported</error>" ),
-				$outLang );
+
+		switch ( $inLang ) {
+			case 'fr':
+				switch ( $outLang ) {
+					case 'ipa':
+						$transkriptor = new FrIpaTranskriptor();
+						break;
+					default:
+						throw new InvalidOptionException(
+							sprintf( "<error>Output language '%s' is not (yet) supported</error>" ), $outLang );
+				}
+				break;
+			default:
+				throw new InvalidOptionException(
+					sprintf( "<error>Input language '%s' is not (yet) supported</error>" ), $inLang );
 		}
 
 		$tokens = $this->tokenize( $inLang, $inPhrase );
@@ -92,486 +102,29 @@ class TranscribeCommand extends Command {
 		$outPhrase = '';
 		foreach ( $tokens as $token ) {
 			if ( ( $token = trim( preg_replace( '/\(.*?\)/i', '', $token ) ) ) ) {
-				$outPhrase .= self::IPA[ $inLang ][ $token ];
+				$outPhrase .= $transkriptor->transcribe( $token );
 			}
 		}
 
 		return trim( $outPhrase );
 	}
 
-	const SUPPORTED_INPUT_LANGUAGES = [ 'fr' ];
-	const SUPPORTED_OUTPUT_LANGUAGES = [ 'ipa' ];
-	const IPA = [
-		'fr' => [
-			'-'   => ' ',
-			'a'   => 'a',
-			'ai'  => 'ɛ',
-			'au'  => 'o',
-			'eau' => 'o',
-			'an'  => 'ã',
-			'e'   => 'ə',
-			'ee'  => 'e',
-			'ɛ'   => 'ɛ',
-			'en'  => 'ɛ̃',
-			'eu'  => 'œ',
-			'oe'  => 'ø',
-			'i'   => 'i',
-			'in'  => 'ɛ̃',
-			'o'   => 'ɔ',
-			'oi'  => 'wa',
-			'ou'  => 'u',
-			'on'  => 'õ',  // 'ɔ̃',
-			'ui'  => 'ɥ',
-			'oui' => 'wi',
-			'u'   => 'y',
-			'un'  => 'œ̃',
-			'g'   => 'ʒ',
-			'gg'  => 'ɡ',
-			'gn'  => 'ɲ',
-			'b'   => 'b',
-			'c'   => 's',
-			'ch'  => 'ʃ',
-			'd'   => 'd',
-			'f'   => 'f',
-			'ʒ'   => 'ʒ',
-			'j'   => 'j',
-			'k'   => 'k',
-			'l'   => 'l',
-			'm'   => 'm',
-			'n'   => 'n',
-			'r'   => 'ʀ',
-			'p'   => 'p',
-			's'   => 's',
-			't'   => 't',
-			'v'   => 'v',
-			'z'   => 'z',
-		],
-	];
-
 	/**
 	 * @param string $inLang
-	 * @param string $inPhrase
+	 * @param string $inWord
 	 *
-	 * @return array All phonemes found in $inPhrase for $inLang language
+	 * @return array All phonemes found in $inWord for $inLang language
 	 * @throws Exception
 	 */
-	private function tokenize( $inLang, $inPhrase ) {
+	private function tokenize( $inLang, $inWord ) {
 		switch ( $inLang ) {
 			case 'fr':
-				return $this->tokenizeFR( $inPhrase );
+				$tokenizer = new FrPhonemTokenizer();
+				break;
 			default:
 				throw new Exception( sprintf( "<error>Language '%s' not yet implemented</error>", $inLang ) );
 		}
-	}
 
-	/**
-	 * @param $inPhrase
-	 *
-	 * @return array All phonemes found in $inPhrase for the French language
-	 * @throws Exception
-	 */
-	private function tokenizeFR( $inPhrase ) {
-
-		$useLiaison        = false;
-		$tokens            = [];
-		$tokenId           = 0;
-		$wordCharPatternFR = '/[a-zàâçéèêëîïôûùüÿñæœ]/i';
-		$inPhrase          = preg_replace( '/(\w)\'(\w)/', '$1$2', $inPhrase );  // remove '
-		// TODO remove punctuation
-		$inPhraseA = str_split( $inPhrase );
-		for ( $i = 0; $i < sizeof( $inPhraseA ); $i ++ ) {
-			$ch  = $inPhraseA[ $i ];
-			$ch2 = array_key_exists( $i + 1, $inPhraseA ) ? $inPhraseA[ $i + 1 ] : '';
-			$ch3 = array_key_exists( $i + 2, $inPhraseA ) ? $inPhraseA[ $i + 2 ] : '';
-			$ch4 = array_key_exists( $i + 3, $inPhraseA ) ? $inPhraseA[ $i + 3 ] : '';
-			if ( ! preg_match( $wordCharPatternFR, $ch ) && ! array_key_exists( $tokenId, $tokens ) ) {
-				// FIXME if ( ! ( ! array_key_exists( $tokenId - 1, $tokens ) || $tokens[ $tokenId - 1 ] !== '-' ) ) {
-				$tokens[ $tokenId ] = '-';
-				$tokenId ++;
-				// FIXME }
-				continue;
-			} elseif ( array_key_exists( $tokenId, $tokens ) ) {
-				throw new Exception( "<error>\$tokenId hadn't been increased</error>" );
-			}
-			switch ( $ch ) {
-				case 'a':
-					switch ( $ch2 ) {
-						case 'i':
-							$tokens[ $tokenId ] = 'ai';
-							$tokenId ++;
-							$i ++;
-							if ( $ch3 == 's' && preg_match( $wordCharPatternFR, $ch4 ) ) {
-								$tokens[ $tokenId ] = 'z';
-								$tokenId ++;
-								$i ++;
-							}
-							break( 2 );
-						case 'u':
-							$tokens[ $tokenId ] = 'au';
-							$tokenId ++;
-							$i ++;
-							break( 2 );
-						case 'n':
-							$tokens[ $tokenId ] = 'an';
-							$tokenId ++;
-							$i ++;
-							break( 2 );
-						default:
-							$tokens[ $tokenId ] = 'a';
-							$tokenId ++;
-					}
-					break;
-				case 'e':
-					switch ( $ch2 ) {
-						case 'a':
-							if ( $ch3 == 'u' ) {
-								$tokens[ $tokenId ] = 'eau';
-								$tokenId ++;
-								$i += 2;
-								break( 2 );
-							}
-							break;
-						case 'u':
-							if ( ! preg_match( $wordCharPatternFR, $ch3 ) ) {
-								$tokens[ $tokenId ] = 'oe';
-								$tokenId ++;
-								$i ++;
-							} else {
-								$tokens[ $tokenId ] = 'eu';
-								$tokenId ++;
-								$i ++;
-							}
-							break( 2 );
-						case 'n':
-							switch ( $ch3 ) {
-								case 'o':
-									$tokens[ $tokenId ] = 'e';
-									$tokenId ++;
-									break( 3 );
-								case 'n':
-									$tokens[ $tokenId ] = 'ɛ';
-									$tokenId ++;
-									break( 3 );
-								default:
-									$tokens[ $tokenId ] = 'en';
-									$tokenId ++;
-									$i ++;
-									break( 3 );
-							}
-						case 'l':
-							if ( $ch3 != 'l' ) {
-								$tokens[ $tokenId ] = 'ɛ';
-								$tokenId ++;
-								break( 2 );
-							}
-							break;
-						case 'r':
-							if ( ! preg_match( $wordCharPatternFR, $ch3 ) ) {
-								$tokens[ $tokenId ] = 'ee(r)';
-								$tokenId ++;
-								$i ++;
-							} else {
-								$tokens[ $tokenId ] = 'e';
-								$tokenId ++;
-							}
-							break( 2 );
-						case 't':
-							if ( ! preg_match( $wordCharPatternFR, $ch3 ) ) {
-								$tokens[ $tokenId ] = 'ee(t)';
-								$tokenId ++;
-								$i ++;
-								break( 2 );
-							}
-							break;
-						case 's':
-							if ( $ch3 == 't' && ! preg_match( $wordCharPatternFR, $ch4 ) ) {
-								$tokens[ $tokenId ] = 'e(st)';
-								$tokenId ++;
-								$i += 2;
-								break( 2 );
-							}
-							break;
-					}
-					if ( ! preg_match( $wordCharPatternFR, $ch2 ) ) {
-						$tokens[ $tokenId ] = $useLiaison ? 'e' : '(e)';
-						$tokenId ++;
-					} else {
-						$tokens[ $tokenId ] = 'e';
-						$tokenId ++;
-					}
-					break;
-				case 'i':
-					switch ( $ch2 ) {
-						case 'n':
-							$tokens[ $tokenId ] = 'in';
-							$tokenId ++;
-							$i ++;
-							break( 2 );
-						case 'e':
-							$tokens[ $tokenId ] = 'j';
-							$tokenId ++;
-							break( 2 );
-						default:
-							$tokens[ $tokenId ] = 'i';
-							$tokenId ++;
-							break( 2 );
-					}
-				case 'o':
-					switch ( $ch2 ) {
-						case 'i':
-							$tokens[ $tokenId ] = 'oi';
-							$tokenId ++;
-							$i ++;
-							break( 2 );
-						case 'u':
-							if ( $ch3 == 'i' ) {
-								$tokens[ $tokenId ] = 'oui';
-								$tokenId ++;
-								$i += 2;
-							} else {
-								if ( $ch3 == 'p' && ! preg_match( $wordCharPatternFR, $ch4 ) ) {
-									$tokens[ $tokenId ] = 'ou(p)';
-									$tokenId ++;
-									$i += 2;
-								} else {
-									$tokens[ $tokenId ] = 'ou';
-									$tokenId ++;
-									$i ++;
-								}
-							}
-							break( 2 );
-						/** @noinspection PhpMissingBreakStatementInspection */
-						case 'n':
-							if ( $ch3 != 'n' && $ch4 != 'e' ) {
-								$tokens[ $tokenId ] = 'on';
-								$tokenId ++;
-								$i ++;
-								break( 2 );
-							}
-						default:
-							$tokens[ $tokenId ] = 'o';
-							$tokenId ++;
-							break( 2 );
-					}
-					break;
-				case 'u':
-					switch ( $ch2 ) {
-						case 'i':
-							$tokens[ $tokenId ] = 'ui';
-							$tokenId ++;
-							$i ++;
-							break( 2 );
-						case 'n':
-							$tokens[ $tokenId ] = 'un';
-							$tokenId ++;
-							$i ++;
-							break( 2 );
-						default:
-							$tokens[ $tokenId ] = 'u';
-							$tokenId ++;
-							break( 2 );
-					}
-					break;
-				case 'y':
-					$tokens[ $tokenId ] = 'i';
-					$tokenId ++;
-					break;
-				case 'b':
-					$tokens[ $tokenId ] = 'b';
-					$tokenId ++;
-					break;
-				case 'c':
-					if ( $ch2 == '\'' ) {
-						$ch2 = $ch3;
-						$i ++;
-					}
-					switch ( $ch2 ) {
-						case 'a':
-						case 'e':
-						case 'i':
-							$tokens[ $tokenId ] = 'c';
-							$tokenId ++;
-							break( 2 );
-						case 'h':
-							$tokens[ $tokenId ] = 'ch';
-							$tokenId ++;
-							$i ++;
-							break( 2 );
-						default:
-							$tokens[ $tokenId ] = 'k';
-							$tokenId ++;
-							break( 2 );
-					}
-					break;
-				case 'd':
-					if ( ! preg_match( $wordCharPatternFR, $ch2 ) ) {
-						$tokens[ $tokenId ] = $useLiaison ? 'd' : '(d)';
-						$tokenId ++;
-					} else {
-						$tokens[ $tokenId ] = 'd';
-						$tokenId ++;
-					}
-					break;
-				case 'f':
-					$tokens[ $tokenId ] = 'f';
-					$tokenId ++;
-					break;
-				case 'g':
-					switch ( $ch2 ) {
-						case 'e':
-							$tokens[ $tokenId ] = 'g';
-							$tokenId ++;
-//							TODO verify
-//							$i ++;
-							break( 2 );
-						case 'g':
-							$tokens[ $tokenId ] = 'gg';
-							$tokenId ++;
-							$i ++;
-							break( 2 );
-						case 'n':
-							$tokens[ $tokenId ] = 'gn';
-							$tokenId ++;
-							$i ++;
-							break( 2 );
-						default:
-							$tokens[ $tokenId ] = 'gg';
-							$tokenId ++;
-							break( 2 );
-					}
-					break;
-				case 'h':
-					$tokens[ $tokenId ] = '(h)';
-					$tokenId ++;
-					break;
-				case 'j':
-					$tokens[ $tokenId ] = 'ʒ';
-					$tokenId ++;
-					break;
-				case 'k':
-					break;
-				case 'l':
-					$tokens[ $tokenId ] = 'l';
-					$tokenId ++;
-					break;
-				case 'm':
-					if ( $ch2 == 'm' && $ch3 == 'e' ) {
-						$tokens[ $tokenId ] = 'm(me)';
-						$tokenId ++;
-						$i += 2;
-					} else {
-						$tokens[ $tokenId ] = 'm';
-						$tokenId ++;
-					}
-					break;
-				case 'n':
-					if ( $ch2 == 'n' && $ch3 == 'e' ) {
-						$tokens[ $tokenId ] = 'n(ne)';
-						$tokenId ++;
-						$i += 2;
-					} else {
-						$tokens[ $tokenId ] = 'n';
-						$tokenId ++;
-					}
-					break;
-				case 'p':
-					if ( $ch2 == 'h' ) {
-						$tokens[ $tokenId ] = 'f';
-						$tokenId ++;
-						$i ++;
-					} else {
-						$tokens[ $tokenId ] = 'p';
-						$tokenId ++;
-					}
-					break;
-				case 'q':
-					if ( $ch2 == 'u' ) {
-						$tokens[ $tokenId ] = 'k';
-						$tokenId ++;
-						$i ++;
-					}
-					break;
-				case 'r':
-					$tokens[ $tokenId ] = 'r';
-					$tokenId ++;
-					break;
-				case 's':
-					switch ( $ch2 ) {
-//						case 'e':
-//							 TODO verify
-//							$tokens[ $tokenId ] = 'z';
-//							$tokenId ++;
-//							break( 2 );
-						case 'a':
-							$tokens[ $tokenId ] = 's';
-							$tokenId ++;
-							break( 2 );
-						case 's':
-							$tokens[ $tokenId ] = 's(s)';
-							$tokenId ++;
-							$i ++;
-							break( 2 );
-					}
-					if ( ! preg_match( $wordCharPatternFR, $ch2 ) ) {
-						$tokens[ $tokenId ] = $useLiaison ? 's' : '(s)';
-						$tokenId ++;
-					} else {
-						$tokens[ $tokenId ] = 's';
-						$tokenId ++;
-					}
-					break;
-				case 't':
-					switch ( $ch2 ) {
-						case 'i':
-							if ( $ch3 == 'o' ) {
-								$tokens[ $tokenId ] = 's';
-								$tokenId ++;
-								$tokens[ $tokenId ] = 'j';
-								$tokenId ++;
-								$i ++;
-							} else {
-								$tokens[ $tokenId ] = 't';
-								$tokenId ++;
-							}
-							break( 2 );
-						case 't':
-							$tokens[ $tokenId ] = 't(t)';
-							$tokenId ++;
-							$i ++;
-							break( 2 );
-					}
-					if ( ! preg_match( $wordCharPatternFR, $ch2 ) ) {
-						$tokens[ $tokenId ] = $useLiaison ? 't' : '(t)';
-						$tokenId ++;
-					} else {
-						$tokens[ $tokenId ] = 't';
-						$tokenId ++;
-					}
-					break;
-				case 'v':
-					$tokens[ $tokenId ] = 'v';
-					$tokenId ++;
-					break;
-				case 'w':
-					break;
-				case 'x':
-					if ( ! preg_match( $wordCharPatternFR, $ch2 ) ) {
-						$tokens[ $tokenId ] = '(x)';
-						$tokenId ++;
-					}
-					break;
-				case 'z':
-					break;
-				default:
-			}
-		}
-
-		/*
-		foreach ( $tokens as &$token ) {
-			$token = trim( $token );
-		}
-		*/
-
-		return $tokens;
+		return $tokenizer->tokenize( $inWord );
 	}
 }

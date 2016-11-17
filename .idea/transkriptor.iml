@@ -17,6 +17,7 @@
       <excludeFolder url="file://$MODULE_DIR$/vendor/kherge/amend" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/kherge/box" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/myclabs/deep-copy" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/nlp-tools/nlp-tools" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/phine/exception" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/phine/path" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/phpdocumentor/reflection-common" />
@@ -70,6 +71,7 @@
           <root url="file://$MODULE_DIR$/vendor/kherge/amend" />
           <root url="file://$MODULE_DIR$/vendor/kherge/box" />
           <root url="file://$MODULE_DIR$/vendor/myclabs/deep-copy" />
+          <root url="file://$MODULE_DIR$/vendor/nlp-tools/nlp-tools" />
           <root url="file://$MODULE_DIR$/vendor/phine/exception" />
           <root url="file://$MODULE_DIR$/vendor/phine/path" />
           <root url="file://$MODULE_DIR$/vendor/phpdocumentor/reflection-common" />
@@ -119,6 +121,7 @@
           <root url="file://$MODULE_DIR$/vendor/kherge/amend" />
           <root url="file://$MODULE_DIR$/vendor/kherge/box" />
           <root url="file://$MODULE_DIR$/vendor/myclabs/deep-copy" />
+          <root url="file://$MODULE_DIR$/vendor/nlp-tools/nlp-tools" />
           <root url="file://$MODULE_DIR$/vendor/phine/exception" />
           <root url="file://$MODULE_DIR$/vendor/phine/path" />
           <root url="file://$MODULE_DIR$/vendor/phpdocumentor/reflection-common" />
